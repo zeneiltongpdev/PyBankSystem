@@ -104,6 +104,6 @@ curl -X POST http://127.0.0.1:5000/login -H "Content-Type: application/json" -d 
 ### Autor
 👤 **[Zeneilton GP Dev](https://github.com/zeneiltongpdev)**
 
-📜 **Licença: [MIT License]()**
+📜 **Licença: [MIT License](https://github.com/zeneiltongpdev/PyBankSystem/blob/main/LICENSE)**
 
 🚀 **Contribuições são bem-vindas!**
