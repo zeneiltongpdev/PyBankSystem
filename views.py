@@ -7,10 +7,21 @@ from storage import storage
 from decimal import Decimal
 from utils import process_transaction
 from app import db
+import random
+import string
 
 # Blueprints
 auth = Blueprint('auth', __name__)
 main = Blueprint('main', __name__)  # Remove url_prefix to allow root route
+
+def generate_account_number():
+    """Gera um número de conta único com 8 dígitos"""
+    while True:
+        # Gera um número de conta de 8 dígitos
+        account_number = ''.join(random.choices(string.digits, k=8))
+        # Verifica se já existe
+        if not Account.query.filter_by(account_number=account_number).first():
+            return account_number
 
 # Auth routes
 @auth.route('/login', methods=['GET', 'POST'])
@@ -70,6 +81,7 @@ def accounts():
     form = AccountForm()
     if form.validate_on_submit():
         account = Account(
+            account_number=generate_account_number(),
             user_id=current_user.id,
             balance=Decimal('0'),
             account_type=form.account_type.data

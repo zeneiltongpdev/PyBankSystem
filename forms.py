@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, SelectField, DecimalField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError
-from storage import storage
+from models import User, Account
 
 class LoginForm(FlaskForm):
     username = StringField('Nome de Usuário', validators=[DataRequired()])
@@ -31,8 +31,12 @@ class RegisterForm(FlaskForm):
     submit = SubmitField('Registrar')
 
     def validate_username(self, field):
-        if storage.get_user_by_username(field.data):
+        if User.query.filter_by(username=field.data).first():
             raise ValidationError('Este nome de usuário já está em uso')
+
+    def validate_email(self, field):
+        if User.query.filter_by(email=field.data).first():
+            raise ValidationError('Este email já está em uso')
 
 class AccountForm(FlaskForm):
     account_type = SelectField(
@@ -57,5 +61,13 @@ class TransactionForm(FlaskForm):
     )
     amount = DecimalField('Valor', validators=[DataRequired()])
     description = StringField('Descrição', validators=[DataRequired()])
-    to_account_id = StringField('Conta de Destino (apenas para transferências)')
+    to_account_number = StringField('Número da Conta de Destino (apenas para transferências)')
     submit = SubmitField('Realizar Transação')
+
+    def validate_to_account_number(self, field):
+        if self.transaction_type.data == 'transfer':
+            if not field.data:
+                raise ValidationError('Número da conta de destino é obrigatório para transferências')
+            account = Account.query.filter_by(account_number=field.data).first()
+            if not account:
+                raise ValidationError('Conta de destino não encontrada')

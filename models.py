@@ -28,6 +28,7 @@ class Account(db.Model):
     __tablename__ = 'accounts'
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    account_number: Mapped[str] = mapped_column(String(20), unique=True, nullable=False)
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
     balance: Mapped[Decimal] = mapped_column(Numeric(precision=10, scale=2), default=Decimal('0'))
     account_type: Mapped[str] = mapped_column(String(20))

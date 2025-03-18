@@ -7,7 +7,7 @@
     <div class="row">
         <div class="col-md-12">
             <h1 class="mb-4">Gerenciar Contas</h1>
-            
+
             <div class="card mb-4">
                 <div class="card-header">
                     <h5 class="card-title mb-0">Criar Nova Conta</h5>
@@ -34,6 +34,7 @@
                             <table class="table">
                                 <thead>
                                     <tr>
+                                        <th>Número da Conta</th>
                                         <th>Tipo</th>
                                         <th>Saldo</th>
                                         <th>Ações</th>
@@ -42,6 +43,7 @@
                                 <tbody>
                                     {% for account in accounts %}
                                     <tr>
+                                        <td>{{ account.account_number }}</td>
                                         <td>{% if account.account_type == 'savings' %}Poupança{% else %}Corrente{% endif %}</td>
                                         <td>R$ {{ account.balance }}</td>
                                         <td>

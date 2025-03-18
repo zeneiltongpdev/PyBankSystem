@@ -7,7 +7,8 @@
     <div class="row">
         <div class="col-md-12">
             <h1 class="mb-4">Transações</h1>
-            
+            <h4 class="mb-4">Conta: {{ account.account_number }} ({% if account.account_type == 'savings' %}Poupança{% else %}Corrente{% endif %})</h4>
+
             <div class="card mb-4">
                 <div class="card-header">
                     <h5 class="card-title mb-0">Nova Transação</h5>
@@ -28,8 +29,8 @@
                             {{ form.description(class="form-control", id="description") }}
                         </div>
                         <div class="mb-3" id="to_account_field" style="display: none;">
-                            <label for="to_account_id" class="form-label">Conta de Destino</label>
-                            {{ form.to_account_id(class="form-control", id="to_account_id") }}
+                            <label for="to_account_number" class="form-label">Número da Conta de Destino</label>
+                            {{ form.to_account_number(class="form-control", id="to_account_number", placeholder="Digite o número da conta de destino") }}
                         </div>
                         {{ form.submit(class="btn btn-primary") }}
                     </form>
@@ -51,6 +52,7 @@
                                         <th>Tipo</th>
                                         <th>Valor</th>
                                         <th>Descrição</th>
+                                        <th>Conta Destino</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -68,6 +70,11 @@
                                         </td>
                                         <td>R$ {{ transaction.amount }}</td>
                                         <td>{{ transaction.description }}</td>
+                                        <td>
+                                            {% if transaction.to_account %}
+                                                {{ transaction.to_account.account_number }}
+                                            {% endif %}
+                                        </td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
