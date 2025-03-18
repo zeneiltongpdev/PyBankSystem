@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Gerenciar Contas{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="mb-4">Gerenciar Contas</h1>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Criar Nova Conta</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        <div class="mb-3">
+                            <label for="account_type" class="form-label">Tipo de Conta</label>
+                            {{ form.account_type(class="form-select", id="account_type") }}
+                        </div>
+                        {{ form.submit(class="btn btn-primary") }}
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Suas Contas</h5>
+                </div>
+                <div class="card-body">
+                    {% if accounts %}
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Tipo</th>
+                                        <th>Saldo</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for account in accounts %}
+                                    <tr>
+                                        <td>{% if account.account_type == 'savings' %}Poupança{% else %}Corrente{% endif %}</td>
+                                        <td>R$ {{ account.balance }}</td>
+                                        <td>
+                                            <a href="{{ url_for('main.transactions', account_id=account.id) }}" 
+                                               class="btn btn-outline-primary btn-sm">
+                                                Transações
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-center mb-0">Você ainda não tem contas.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
