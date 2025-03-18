@@ -21,9 +21,24 @@ app.secret_key = os.environ.get("SESSION_SECRET", "dev-session-secret")
 jwt = JWTManager(app)
 
 # Initialize API with swagger documentation
-api = Api(app, version='1.0', title='Banking API',
-          description='A simple banking API with JWT authentication',
-          doc='/docs')
+authorizations = {
+    'Bearer': {
+        'type': 'apiKey',
+        'in': 'header',
+        'name': 'Authorization',
+        'description': "Type in the *'Value'* input box below: **'Bearer &lt;JWT&gt;'**, where JWT is the token"
+    }
+}
+
+api = Api(
+    app,
+    version='1.0',
+    title='My Bank API',
+    description='API bancária REST com autenticação JWT',
+    doc='/docs',
+    authorizations=authorizations,
+    security='Bearer'
+)
 
 # Import routes after app initialization to avoid circular imports
 from routes import initialize_routes
