@@ -9,7 +9,7 @@ from utils import process_transaction
 
 # Blueprints
 auth = Blueprint('auth', __name__)
-main = Blueprint('main', __name__, url_prefix='/')
+main = Blueprint('main', __name__)  # Remove url_prefix to allow root route
 
 # Auth routes
 @auth.route('/login', methods=['GET', 'POST'])
@@ -55,8 +55,6 @@ def logout():
 # Main routes
 @main.route('/')
 def index():
-    if current_user.is_authenticated:
-        return redirect(url_for('main.dashboard'))
     return render_template('index.html')
 
 @main.route('/dashboard')

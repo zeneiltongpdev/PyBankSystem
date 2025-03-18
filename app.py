@@ -52,14 +52,14 @@ api = Api(
     security='Bearer'
 )
 
-# Register blueprints
-from views import auth, main
-app.register_blueprint(auth)
-app.register_blueprint(main)
-
 # Import routes after app initialization to avoid circular imports
 from routes import initialize_routes
 initialize_routes(api)
+
+# Register blueprints
+from views import auth, main
+app.register_blueprint(main)  # Register main blueprint first for root route priority
+app.register_blueprint(auth)
 
 if __name__ == '__main__':
     # ALWAYS serve the app on port 5000
