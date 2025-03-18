@@ -131,7 +131,31 @@ def initialize_routes(api):
                 logger.error(f"Erro na listagem de contas: {str(e)}")
                 raise BadRequest(str(e))
 
-    @transaction_ns.route('/<account_id>')
+    @account_ns.route('/<int:account_id>')
+    class AccountResource(Resource):
+        @jwt_required()
+        @api.response(200, 'Conta encontrada')
+        @api.response(404, 'Conta não encontrada')
+        def get(self, account_id):
+            try:
+                user_id = get_jwt_identity()
+                account = storage.get_account(account_id)
+
+                if not account or str(account.user_id) != user_id:
+                    raise NotFound('Conta não encontrada')
+
+                return {
+                    'id': account.id,
+                    'type': account.account_type,
+                    'balance': str(account.balance)
+                }, 200
+            except Exception as e:
+                logger.error(f"Erro ao buscar conta: {str(e)}")
+                if isinstance(e, NotFound):
+                    raise
+                raise BadRequest(str(e))
+
+    @transaction_ns.route('/<int:account_id>')
     class TransactionResource(Resource):
         @jwt_required()
         @api.expect(transaction_model)
@@ -143,7 +167,7 @@ def initialize_routes(api):
                 user_id = get_jwt_identity()
                 account = storage.get_account(account_id)
 
-                if not account or account.user_id != user_id:
+                if not account or str(account.user_id) != user_id:
                     raise NotFound('Conta não encontrada')
 
                 data = TransactionSchema().load(api.payload)
@@ -159,7 +183,6 @@ def initialize_routes(api):
                     raise BadRequest(message)
 
                 transaction = Transaction(
-                    id='',  # Will be set by storage
                     account_id=account_id,
                     transaction_type=data['transaction_type'],
                     amount=Decimal(str(data['amount'])),

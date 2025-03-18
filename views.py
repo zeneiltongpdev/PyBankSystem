@@ -6,6 +6,7 @@ from models import User, Account, Transaction
 from storage import storage
 from decimal import Decimal
 from utils import process_transaction
+from app import db
 
 # Blueprints
 auth = Blueprint('auth', __name__)
@@ -19,7 +20,7 @@ def login():
 
     form = LoginForm()
     if form.validate_on_submit():
-        user = storage.get_user_by_username(form.username.data)
+        user = User.query.filter_by(username=form.username.data).first()
         if user and user.check_password(form.password.data):
             login_user(user)
             flash('Login realizado com sucesso!', 'success')
@@ -35,12 +36,12 @@ def register():
     form = RegisterForm()
     if form.validate_on_submit():
         user = User(
-            id='',
             username=form.username.data,
             email=form.email.data,
             password_hash=generate_password_hash(form.password.data)
         )
-        storage.create_user(user)
+        db.session.add(user)
+        db.session.commit()
         flash('Registro realizado com sucesso! Faça login para continuar.', 'success')
         return redirect(url_for('auth.login'))
     return render_template('register.html', form=form)
@@ -60,7 +61,7 @@ def index():
 @main.route('/dashboard')
 @login_required
 def dashboard():
-    accounts = storage.get_user_accounts(current_user.id)
+    accounts = Account.query.filter_by(user_id=current_user.id).all()
     return render_template('dashboard.html', accounts=accounts)
 
 @main.route('/accounts', methods=['GET', 'POST'])
@@ -69,23 +70,23 @@ def accounts():
     form = AccountForm()
     if form.validate_on_submit():
         account = Account(
-            id='',
             user_id=current_user.id,
             balance=Decimal('0'),
             account_type=form.account_type.data
         )
-        storage.create_account(account)
+        db.session.add(account)
+        db.session.commit()
         flash('Conta criada com sucesso!', 'success')
         return redirect(url_for('main.accounts'))
 
-    accounts = storage.get_user_accounts(current_user.id)
+    accounts = Account.query.filter_by(user_id=current_user.id).all()
     return render_template('accounts.html', accounts=accounts, form=form)
 
-@main.route('/transactions/<account_id>', methods=['GET', 'POST'])
+@main.route('/transactions/<int:account_id>', methods=['GET', 'POST'])
 @login_required
 def transactions(account_id):
-    account = storage.get_account(account_id)
-    if not account or account.user_id != current_user.id:
+    account = Account.query.get_or_404(account_id)
+    if account.user_id != current_user.id:
         flash('Conta não encontrada', 'danger')
         return redirect(url_for('main.accounts'))
 
@@ -101,18 +102,21 @@ def transactions(account_id):
 
         if success:
             transaction = Transaction(
-                id='',
                 account_id=account_id,
                 transaction_type=form.transaction_type.data,
                 amount=form.amount.data,
                 description=form.description.data,
                 to_account_id=form.to_account_id.data if form.transaction_type.data == 'transfer' else None
             )
-            storage.create_transaction(transaction)
+            db.session.add(transaction)
+            db.session.commit()
             flash(message, 'success')
         else:
             flash(message, 'danger')
         return redirect(url_for('main.transactions', account_id=account_id))
 
-    transactions = storage.get_account_transactions(account_id)
+    transactions = Transaction.query.filter(
+        (Transaction.account_id == account_id) | 
+        (Transaction.to_account_id == account_id)
+    ).all()
     return render_template('transactions.html', account=account, transactions=transactions, form=form)
