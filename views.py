@@ -109,7 +109,7 @@ def transactions(account_id):
             form.transaction_type.data,
             form.amount.data,
             form.description.data,
-            form.to_account_id.data if form.transaction_type.data == 'transfer' else None
+            form.to_account_number.data if form.transaction_type.data == 'transfer' else None
         )
 
         if success:
@@ -118,7 +118,9 @@ def transactions(account_id):
                 transaction_type=form.transaction_type.data,
                 amount=form.amount.data,
                 description=form.description.data,
-                to_account_id=form.to_account_id.data if form.transaction_type.data == 'transfer' else None
+                to_account_id=Account.query.filter_by(account_number=form.to_account_number.data).first().id
+                if form.transaction_type.data == 'transfer' and form.to_account_number.data
+                else None
             )
             db.session.add(transaction)
             db.session.commit()
