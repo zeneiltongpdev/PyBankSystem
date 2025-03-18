@@ -18,7 +18,7 @@ app = Flask(__name__)
 # Configure app
 app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'dev-secret-key')
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
-app.secret_key = os.environ.get("SESSION_SECRET", "dev-session-secret")
+app.secret_key = os.environ.get("SESSION_SECRET")
 
 # Initialize extensions
 jwt = JWTManager(app)
@@ -62,4 +62,5 @@ from routes import initialize_routes
 initialize_routes(api)
 
 if __name__ == '__main__':
+    # ALWAYS serve the app on port 5000
     app.run(host='0.0.0.0', port=5000, debug=True)

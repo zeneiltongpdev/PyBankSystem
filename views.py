@@ -9,14 +9,14 @@ from utils import process_transaction
 
 # Blueprints
 auth = Blueprint('auth', __name__)
-main = Blueprint('main', __name__)
+main = Blueprint('main', __name__, url_prefix='/')
 
 # Auth routes
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('main.dashboard'))
-    
+
     form = LoginForm()
     if form.validate_on_submit():
         user = storage.get_user_by_username(form.username.data)
@@ -31,7 +31,7 @@ def login():
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('main.dashboard'))
-    
+
     form = RegisterForm()
     if form.validate_on_submit():
         user = User(
@@ -79,7 +79,7 @@ def accounts():
         storage.create_account(account)
         flash('Conta criada com sucesso!', 'success')
         return redirect(url_for('main.accounts'))
-    
+
     accounts = storage.get_user_accounts(current_user.id)
     return render_template('accounts.html', accounts=accounts, form=form)
 
@@ -100,7 +100,7 @@ def transactions(account_id):
             form.description.data,
             form.to_account_id.data if form.transaction_type.data == 'transfer' else None
         )
-        
+
         if success:
             transaction = Transaction(
                 id='',
