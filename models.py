@@ -2,14 +2,22 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import List, Optional
 from decimal import Decimal
+from flask_login import UserMixin
 
 @dataclass
-class User:
+class User(UserMixin):
     id: str
     username: str
     password_hash: str
     email: str
     created_at: datetime = datetime.utcnow()
+
+    def get_id(self):
+        return str(self.id)
+
+    def check_password(self, password):
+        from utils import verify_password
+        return verify_password(self.password_hash, password)
 
 @dataclass
 class Account:
